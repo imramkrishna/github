@@ -4,8 +4,8 @@ import { sendEmail, generateOtp } from "./verification";
 import { Redis } from '@upstash/redis';
 const router = express.Router();
 const redis = new Redis({
-    url: 'https://more-raven-32923.upstash.io',
-    token: 'AYCbAAIjcDE2YzliMmY4OGU4Yzg0ODU5OTdkZTBiNGEzYjMwNmM4MXAxMA',
+    url: process.env.REDIS_URL,
+    token: process.env.REDIS_TOKEN,
 })
 router.post("/login", async (req, res) => {
     const loginData: User = req.body;
