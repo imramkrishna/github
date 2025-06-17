@@ -2,6 +2,7 @@ import express from "express";
 import { User, UserRegistration, EmailOptions } from "../types";
 import { sendEmail, generateOtp } from "./verification";
 import { Redis } from '@upstash/redis';
+import { RegisterUser } from "../models/userModels";
 const router = express.Router();
 const redis = new Redis({
     url: process.env.REDIS_URL,
@@ -17,18 +18,30 @@ router.post("/login", async (req, res) => {
         return;
     }
     res.status(200).json({
-        data: loginData
+        data: loginData.email
     })
 
 })
 router.post("/verify", async (req, res) => {
-    const { email, value } = req.body;
+    const { email, value, userData } = req.body;
     const otp = await redis.hget(email, "otp")
 
     if (otp == value) {
         res.status(200).json({
             message: "User verified with otp"
         })
+        console.log("userdata: ",userData)
+        try {
+            const newuser = new RegisterUser({ 
+                username:userData.username,
+                email:userData.email,
+                password:userData.password
+             })
+            await newuser.save();
+            console.log("user saved into database.")
+        } catch (e) {
+            console.log("cant save user data.",e)
+        }
         return;
     }
     res.status(404).json({
@@ -59,7 +72,8 @@ router.post("/register", async (req, res) => {
         })
         res.status(201).json({
             message: "User created successfully. Please check your email for OTP.",
-            email: registerData.email
+            email: registerData.email,
+            userData: registerData
         })
     }).catch((error) => {
         console.error("Error sending email:", error);

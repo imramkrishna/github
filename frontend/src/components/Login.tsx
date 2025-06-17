@@ -1,17 +1,24 @@
 import { useState } from "react";
 import { FaGithub, FaUser, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
-import {useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "dotenv";
+import { useAuth } from "../context/authContext";
 
 function Login() {
-    const navigate=useNavigate();
+    const navigate = useNavigate();
     const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
+    const auth = useAuth();
+    if (!auth) {
+        // Handle the case when auth context is not available
+        return <div>Loading authentication...</div>;
+    }
+    const {login}=auth;
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -20,7 +27,9 @@ function Login() {
         const response = await axios.post(`${BACKEND_URL}/auth/login`, formData)
         if (response.status === 200) {
             setIsLoading(false)
-            navigate("/dashboard",{state:{response}})
+            // Assuming the backend returns user data in response.data.user
+            login(response.data.user)
+            navigate("/dashboard", { state: { response } })
             return
         }
         console.log("error message")

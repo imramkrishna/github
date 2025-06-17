@@ -5,9 +5,11 @@ import { FaGithub } from "react-icons/fa";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import { HiCheckCircle, HiXCircle } from "react-icons/hi";
 import axios, { AxiosError } from "axios";
+import { useAuth } from "../context/authContext";
 
 // Define interface for location state
 interface LocationState {
+    userData: {};
     email?: string;
 }
 
@@ -17,13 +19,18 @@ interface ApiErrorResponse {
 }
 
 function OtpVerification(): ReactElement {
+    const auth=useAuth();
+    if(!auth){
+        return <div>Loading authentication.</div>
+    }
     const navigate = useNavigate();
     const location = useLocation() as { state: LocationState };
     const BACKEND_URL: string = import.meta.env.VITE_BACKEND_URL;
-
+    const {login}=auth;
     // Get email from navigation state
     const email: string = location.state?.email || "";
-
+    const userData=location.state?.userData;
+    console.log("UserData: ",userData)
     const [otp, setOtp] = useState<string[]>(["", "", "", "", "", ""]);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [isResending, setIsResending] = useState<boolean>(false);
@@ -110,11 +117,13 @@ function OtpVerification(): ReactElement {
         try {
             const response = await axios.post(`${BACKEND_URL}/auth/verify`, {
                 email,
-                value: otpValue
+                value: otpValue,
+                userData:userData
             });
 
             if (response.status === 200) {
                 setSuccess("Email verified successfully!");
+                login({ email })
                 setTimeout(() => {
                     navigate("/dashboard");
                 }, 1500);

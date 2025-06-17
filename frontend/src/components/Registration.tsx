@@ -63,7 +63,7 @@ function Registration() {
         email: formData.email,
         password: formData.password
       }).then(response=>{
-        navigate("/verification", { state: { email: formData.email } });
+        navigate("/verification", { state: { email: formData.email,userData:formData } });
       })
     } catch (error) {
       console.error("Registration error:", error);

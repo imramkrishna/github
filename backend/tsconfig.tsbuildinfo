@@ -1,1 +1,1 @@
-{"root":["./src/index.ts","./src/types.ts","./src/auth/authroutes.ts","./src/auth/verification.ts"],"version":"5.8.3"}
+{"root":["./src/connectdb.ts","./src/index.ts","./src/types.ts","./src/auth/authroutes.ts","./src/auth/verification.ts","./src/models/usermodels.ts"],"version":"5.8.3"}
