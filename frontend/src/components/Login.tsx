@@ -18,23 +18,22 @@ function Login() {
         // Handle the case when auth context is not available
         return <div>Loading authentication...</div>;
     }
-    const {login}=auth;
+    const { login } = auth;
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         const formData = { email, password }
         setIsLoading(true)
-        const response = await axios.post(`${BACKEND_URL}/auth/login`, formData)
-        if (response.status === 200) {
+        const response = await axios.post(`${BACKEND_URL}/auth/login`, formData).then(response => {
             setIsLoading(false)
-            // Assuming the backend returns user data in response.data.user
-            login(response.data.user)
-            navigate("/dashboard", { state: { response } })
-            return
-        }
+            const token=response.data.token
+            localStorage.setItem("token",token)
+            login(formData)
+            navigate("/dashboard")
+        }).catch(e=>{
         console.log("error message")
         setIsLoading(false)
-
+        })
     };
 
     return (

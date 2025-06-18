@@ -8,6 +8,7 @@ import { BiGitPullRequest } from 'react-icons/bi';
 import { CgGitFork } from 'react-icons/cg';
 import axios from 'axios';
 import { useAuth } from '../context/authContext';
+import { useLocation } from 'react-router-dom';
 
 interface Repository {
     id: string;
@@ -36,7 +37,9 @@ const Dashboard = (): ReactElement => {
     const [repositories, setRepositories] = useState<Repository[]>([]);
     const [activities, setActivities] = useState<Activity[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
+    const [user,setUser]=useState<string | null>(null)
     const [activeTab, setActiveTab] = useState<'overview' | 'repositories' | 'projects'>('overview');
+    const location = useLocation();
     if (!auth) {
         // Handle the case when auth context is not available
         return <div>Loading authentication...</div>;
@@ -58,116 +61,20 @@ const Dashboard = (): ReactElement => {
         "CSS": "#563d7c"
     };
 
-    // Mock data - replace with API calls
     useEffect(() => {
-        const fetchData = async () => {
-            setLoading(true);
-            try {
-                // In a real app, fetch from your backend
-                // const repoResponse = await axios.get(`${BACKEND_URL}/api/repos`);
-                // const activityResponse = await axios.get(`${BACKEND_URL}/api/activities`);
-
-                // Mock data
-                const mockRepositories: Repository[] = [
-                    {
-                        id: "1",
-                        name: "react-github-clone",
-                        description: "A clone of GitHub built with React and TypeScript",
-                        stars: 28,
-                        forks: 12,
-                        issues: 3,
-                        language: "TypeScript",
-                        updatedAt: "Updated 2 days ago",
-                        isPrivate: false
-                    },
-                    {
-                        id: "2",
-                        name: "node-auth-api",
-                        description: "Authentication API built with Node.js and Express",
-                        stars: 17,
-                        forks: 5,
-                        issues: 1,
-                        language: "JavaScript",
-                        updatedAt: "Updated 1 week ago",
-                        isPrivate: false
-                    },
-                    {
-                        id: "3",
-                        name: "personal-website",
-                        description: "My personal portfolio website",
-                        stars: 8,
-                        forks: 2,
-                        issues: 0,
-                        language: "HTML",
-                        updatedAt: "Updated 3 weeks ago",
-                        isPrivate: true
-                    },
-                    {
-                        id: "4",
-                        name: "python-data-science",
-                        description: "Data science projects and notebooks",
-                        stars: 45,
-                        forks: 23,
-                        issues: 5,
-                        language: "Python",
-                        updatedAt: "Updated yesterday",
-                        isPrivate: false
-                    }
-                ];
-
-                const mockActivities: Activity[] = [
-                    {
-                        id: "1",
-                        type: "commit",
-                        repo: "react-github-clone",
-                        message: "Add responsive dashboard layout",
-                        time: "1 day ago",
-                        user: "johndoe"
-                    },
-                    {
-                        id: "2",
-                        type: "issue",
-                        repo: "node-auth-api",
-                        message: "Fix session timeout issue",
-                        time: "3 days ago",
-                        user: "janedoe"
-                    },
-                    {
-                        id: "3",
-                        type: "pr",
-                        repo: "react-github-clone",
-                        message: "Implement dark mode toggle",
-                        time: "5 days ago",
-                        user: "johndoe"
-                    },
-                    {
-                        id: "4",
-                        type: "fork",
-                        repo: "python-data-science",
-                        message: "Forked from original/repo",
-                        time: "1 week ago",
-                        user: "newdev"
-                    },
-                    {
-                        id: "5",
-                        type: "star",
-                        repo: "node-auth-api",
-                        message: "Starred repository",
-                        time: "2 weeks ago",
-                        user: "webdev123"
-                    }
-                ];
-
-                setRepositories(mockRepositories);
-                setActivities(mockActivities);
-            } catch (error) {
-                console.error("Error fetching dashboard data:", error);
-            } finally {
-                setLoading(false);
+        const token = localStorage.getItem("token");
+        const user = axios.get(`${BACKEND_URL}/auth/profile`, {
+            headers: {
+                Authorization: `Bearer ${token}`
             }
-        };
-
-        fetchData();
+        })
+        .then(res=>{
+            setUser(res.data.user.email)
+            console.log(res.data.user.email)
+        })
+        .catch(e=>{
+            console.log("Unauthorized.")
+        })
     }, []);
 
     const handleLogout = async () => {
