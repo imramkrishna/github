@@ -4,7 +4,6 @@ import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "dotenv";
-import { useAuth } from "../context/authContext";
 
 function Login() {
     const navigate = useNavigate();
@@ -13,13 +12,7 @@ function Login() {
     const [password, setPassword] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
-    const auth = useAuth();
-    if (!auth) {
-        // Handle the case when auth context is not available
-        return <div>Loading authentication...</div>;
-    }
-    const { login } = auth;
-
+    
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         const formData = { email, password }
@@ -28,8 +21,10 @@ function Login() {
             setIsLoading(false)
             const token=response.data.token
             localStorage.setItem("token",token)
-            login(formData)
-            navigate("/dashboard")
+            setTimeout(()=>{
+                navigate("/dashboard")
+             },1500)
+            
         }).catch(e=>{
         console.log("error message")
         setIsLoading(false)

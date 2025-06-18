@@ -7,7 +7,6 @@ import {
 import { BiGitPullRequest } from 'react-icons/bi';
 import { CgGitFork } from 'react-icons/cg';
 import axios from 'axios';
-import { useAuth } from '../context/authContext';
 import { useLocation } from 'react-router-dom';
 
 interface Repository {
@@ -32,7 +31,6 @@ interface Activity {
 }
 
 const Dashboard = (): ReactElement => {
-    const auth = useAuth();
     const navigate = useNavigate();
     const [repositories, setRepositories] = useState<Repository[]>([]);
     const [activities, setActivities] = useState<Activity[]>([]);
@@ -40,12 +38,7 @@ const Dashboard = (): ReactElement => {
     const [user,setUser]=useState<string | null>(null)
     const [activeTab, setActiveTab] = useState<'overview' | 'repositories' | 'projects'>('overview');
     const location = useLocation();
-    if (!auth) {
-        // Handle the case when auth context is not available
-        return <div>Loading authentication...</div>;
-    }
     const BACKEND_URL: string = import.meta.env.VITE_BACKEND_URL;
-    const { isAuthenticated } = auth;
     // Language colors
     const languageColors: Record<string, string> = {
         "JavaScript": "#f1e05a",
@@ -60,9 +53,11 @@ const Dashboard = (): ReactElement => {
         "HTML": "#e34c26",
         "CSS": "#563d7c"
     };
-
+    var token=localStorage.getItem("token")
+    if(!token){
+        return <div className='text-white'>Not authenticated</div>
+    }
     useEffect(() => {
-        const token = localStorage.getItem("token");
         const user = axios.get(`${BACKEND_URL}/auth/profile`, {
             headers: {
                 Authorization: `Bearer ${token}`
@@ -70,7 +65,6 @@ const Dashboard = (): ReactElement => {
         })
         .then(res=>{
             setUser(res.data.user.email)
-            console.log(res.data.user.email)
         })
         .catch(e=>{
             console.log("Unauthorized.")
@@ -80,7 +74,7 @@ const Dashboard = (): ReactElement => {
     const handleLogout = async () => {
         try {
             await axios.post(`${BACKEND_URL}/auth/logout`);
-            navigate('/login');
+            navigate('/');
         } catch (error) {
             console.error("Logout failed:", error);
         }
@@ -97,63 +91,33 @@ const Dashboard = (): ReactElement => {
             default: return null;
         }
     };
-    if (!isAuthenticated) {
-        return <div className='text-white'>Not authenticated</div>
-    }
 
     return (
-        <div className="min-h-screen bg-gray-900 text-gray-200">
+        <div className="min-h-screen w-full bg-gray-900 text-gray-200">
             {/* Header navigation */}
-            <header className="bg-gray-800 border-b border-gray-700">
-                <div className="container mx-auto px-4">
-                    <div className="flex items-center h-16 justify-between">
-                        <div className="flex items-center">
-                            <FaGithub className="h-8 w-8 text-white" />
-                            <div className="ml-4 relative">
-                                <div className="relative">
-                                    <input
-                                        type="text"
-                                        placeholder="Search or jump to..."
-                                        className="bg-gray-900 text-sm rounded-md py-1.5 pl-3 pr-10 w-64 focus:outline-none focus:ring-1 focus:ring-blue-500 border border-gray-700"
-                                    />
-                                    <div className="absolute inset-y-0 right-0 flex items-center pr-2">
-                                        <div className="border border-gray-600 rounded text-xs px-1 text-gray-400">/</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="flex items-center space-x-4">
-                            <button className="text-gray-400 hover:text-gray-200">
-                                <FaBell className="h-5 w-5" />
-                            </button>
-                            <button className="text-gray-400 hover:text-gray-200">
-                                <FaPlus className="h-5 w-5" />
-                            </button>
-                            <div className="relative group">
-                                <button className="flex items-center gap-2">
-                                    <div className="h-8 w-8 rounded-full bg-gray-600 flex items-center justify-center text-gray-200">
-                                        <FaUser className="h-4 w-4" />
-                                    </div>
-                                </button>
-                                <div className="absolute right-0 mt-2 w-48 bg-gray-800 border border-gray-700 rounded-md shadow-lg hidden group-hover:block z-10">
-                                    <div className="py-1">
-                                        <a href="#" className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700">Your profile</a>
-                                        <a href="#" className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700">Your repositories</a>
-                                        <a href="#" className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700">Settings</a>
-                                        <button
-                                            onClick={handleLogout}
-                                            className="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700"
-                                        >
-                                            Sign out
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+            <header className="bg-gray-800 w-full border-b border-gray-700 px-6">
+    <div className="flex items-center h-16 justify-between max-w-[1400px] mx-auto w-full">
+        <div className="flex items-center">
+            <FaGithub className="h-8 w-8 text-white" />
+            <div className="ml-4 relative">
+                <div className="relative">
+                    <input
+                        type="text"
+                        placeholder="Search or jump to..."
+                        className="bg-gray-900 text-sm rounded-md py-1.5 pl-3 pr-10 w-64 focus:outline-none focus:ring-1 focus:ring-blue-500 border border-gray-700"
+                    />
+                    <div className="absolute inset-y-0 right-0 flex items-center pr-2">
+                        <div className="border border-gray-600 rounded text-xs px-1 text-gray-400">/</div>
                     </div>
                 </div>
-            </header>
+            </div>
+        </div>
+
+        <div className="flex items-center space-x-4">
+            {/* Right side content */}
+        </div>
+    </div>
+</header>
 
             {/* Main content */}
             <main className="container mx-auto px-4 py-8">
